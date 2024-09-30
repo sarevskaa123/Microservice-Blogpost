@@ -1,0 +1,64 @@
+services:
+  # Blog Service
+  blog-service:
+    image: blogservice
+    container_name: blog-service
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://blogdb:3306/blogpost_service?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Kumanovo2024
+      BLOG_AUTHSERVICE_URL: http://auth-service:8081
+    depends_on:
+      - blogdb
+    volumes:
+      - .blogservice:/root/blogservice
+
+  # Auth Service
+  auth-service:
+    image: authservice
+    container_name: auth-service
+    restart: always
+    ports:
+      - "8081:8081"
+    networks:
+      - app-network
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:mysql://authdb:3306/authentication_service?allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Kumanovo2024
+    depends_on:
+      - authdb
+    volumes:
+      - .auth-service:/root/auth-service
+
+  blogdb:
+    container_name: sqlserver
+    image: "mysql:8.0.39"
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: blogpost_service
+      MYSQL_ROOT_PASSWORD: Kumanovo2024
+    networks:
+      - app-network
+
+  authdb:
+    image: "mysql:8.0.39"
+    container_name: sqlserver2
+    ports:
+      - 3307:3306
+    environment:
+      MYSQL_DATABASE: authentication_service
+      MYSQL_ROOT_PASSWORD: Kumanovo2024
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
